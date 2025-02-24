@@ -1,4 +1,6 @@
 import machine
+from machine import ADC
+from machine import PWM
 import utime
 
 year = int(input("Year? "))
@@ -23,6 +25,25 @@ def display_datetime(timer):
 # Setup hardware timer
 timer = machine.Timer(0)
 timer.init(period=30000, mode=machine.Timer.PERIODIC, callback=display_datetime)
+
+
+pot = Pin(36, Pin.IN) # input signal from potentiometer
+
+def ADC_potentiometer(tim):
+    
+    adc_pot = ADC(pot) # convert pot signal from analog to digital
+    
+# Setup hardware timer for pot signal
+tim = machine.Timer(0)
+tim.init(preriod=100, mode=machine.Timer.PERIODIC, callback=ADC_potentiometer)
+
+
+led = Pin(13, Pin.OUT) # output LED
+
+pwm = PWM(led, freq=10, duty_u16 = 512)
+
+
+
 
 
 while True:
