@@ -1,5 +1,4 @@
 from machine import RTC, Timer, ADC, PWM, Pin
-import utime
 
 # get user input for date and time
 year = int(input("Year? "))
@@ -26,24 +25,67 @@ def display_datetime(timer):
 datetime_timer = Timer(0)
 datetime_timer.init(period=30000, mode=Timer.PERIODIC, callback=display_datetime)
 
+
 # setup ADC for potentiometer
 pot = Pin(36, Pin.IN)
 adc_pot = ADC(pot)
 adc_pot.atten(ADC.ATTN_11DB)  # attenuation for full range 0-3.3V
+pressed = 0
+# setup PWM signal for LED
+led = Pin(13, Pin.OUT)
+pwm_led = PWM(led, freq=10, duty_u16=512)  
 
 # timer callback function to read input pot
-def adc_potentiometer(timer):
-    pot_value = adc_pot.read()  
+def control_led(timer):
+    global pressed
+    pot_val = adc_pot.read()
+    
+    if pressed == 1:
+        new_freq = max(1, (pot_val * 100) // 4095)
+        pwm_led.freq(new_freq)
+        
+
+    elif pressed == 2:
+        new_duty = (pot_val * 65535) // 4095
+        pwm_led.duty_u16(new_duty)
+        
+        
+    else:
+        pwm_led.freq(10)
+        pwm_led.duty_u16(512)
+        
+        
 
 
 # setup hardware timer for pot readings
 pot_timer = Timer(1)
-pot_timer.init(period=100, mode=Timer.PERIODIC, callback=adc_potentiometer)
+pot_timer.init(period=100, mode=Timer.PERIODIC, callback=control_led)
 
-# setup PWM for LED
-led = Pin(13, Pin.OUT)
-pwm_led = PWM(led, freq=10, duty_u16=512)  
 
+def detect_switch(pin):
+    global pressed
+    
+    if switch.value() == 1:
+
+        if pressed == 0:
+            pressed = 1
+            
+        elif pressed == 1:
+            pressed = 2
+                  
+        elif pressed == 2:
+            pressed = 1
+            
+    
+debounce_timer = Timer(2)
+switch = Pin(38, Pin.IN, Pin.PULL_DOWN)
+
+def debounce_switch(pin):
+    debounce_timer.init(mode=Timer.ONE_SHOT, period=200, callback=detect_switch)
+
+
+switch.irq(handler=debounce_switch, trigger=Pin.IRQ_FALLING)
+    
 while True:
-    pass  
-
+    
+    pass
