@@ -17,8 +17,8 @@ rtc.datetime((year, month, day, weekday, hour, minute, second, microsecond))
 # timer callback function to display date and time
 def display_datetime(timer):
     datetime = rtc.datetime()  
-    formatted_date = f"{datetime[0]:04d}-{datetime[1]:02d}-{datetime[2]:02d}"
-    formatted_time = f"{datetime[4]:02d}:{datetime[5]:02d}:{datetime[6]:02d}.{datetime[7]:06d}"
+    formatted_date = f"{datetime[1]:02d}/{datetime[2]:02d}/{datetime[0]:04d}"
+    formatted_time = f"{datetime[4]:02d}:{datetime[5]:02d}:{datetime[6]:02d}:{datetime[7]:06d}"
     print(f"Date: {formatted_date}\nTime: {formatted_time}\n")
 
 # setup hardware timer for RTC display
@@ -89,3 +89,4 @@ switch.irq(handler=debounce_switch, trigger=Pin.IRQ_FALLING)
 while True:
     
     pass
+    
