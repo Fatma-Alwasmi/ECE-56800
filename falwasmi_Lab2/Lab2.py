@@ -43,11 +43,13 @@ def control_led(timer):
     if pressed == 1:
         new_freq = max(1, (pot_val * 100) // 4095)
         pwm_led.freq(new_freq)
+        pwm_led.duty_u16(512)
         
 
     elif pressed == 2:
         new_duty = (pot_val * 65535) // 4095
         pwm_led.duty_u16(new_duty)
+        pwm_led.freq(100)
         
         
     else:
@@ -89,4 +91,4 @@ switch.irq(handler=debounce_switch, trigger=Pin.IRQ_FALLING)
 while True:
     
     pass
-    
+
