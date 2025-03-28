@@ -1,11 +1,10 @@
 import network
 import ntptime
 import machine
-from machine import RTC, Timer
+from machine import RTC, Timer, deepsleep
 import time
 
 # connect to WI-FI network
-
 
 def do_connect():
     wlan = network.WLAN(network.STA_IF)
@@ -28,7 +27,7 @@ def get_date_time():
     ntptime.settime() # connect to NTP server pool.ntp.org
     current_time = time.localtime(time.time() ) # get UTC time and conver to EST time - 4 * 3600
     
-    # set tral-timer clock to current time fetched above
+    # set real-timer clock to current time fetched above
     rtc.datetime((current_time[0], current_time[1], current_time[2],   # year, month, day
                   current_time[3],                                    # weekday
                   current_time[4], current_time[5], current_time[6], current_time[7])) # hour, minute, second, microsec
@@ -42,6 +41,46 @@ def display_date_time(timer):
     
 do_connect()   
 get_date_time()
-timer = Timer(0)
-timer.init(period = 15000, mode=Timer.PERIODIC, callback=display_date_time)
+timer0 = Timer(0)
+timer0.init(period = 15000, mode=Timer.PERIODIC, callback=display_date_time)
 
+
+# touch pad
+touch = machine.TouchPad(Pin(5, machine.Pin.IN))
+led_neopixel = NeoPixel(machine.Pin(0), 1)
+
+def detect_touch(timer):
+    # not touched
+    if touch.read() >= 1000:
+        led_neopixel[0] = (0, 0, 0)
+        led_neopixel.write()
+    else:
+        led_neopixel[0] = (0, 255, 0)
+        led_neopixel.write()
+        
+
+timer1 = Timer(1)
+timer1.init(period = 50, mode=Timer.PERIODIC, callback=detect_touch)
+led_gpio = Pin(13, machine.PIN.IN)
+
+def sleep(time):
+    machine.deepsleep(60000)
+    
+timer2 = Timer(2)
+timer2.init(period=30000, mode=Timer.PERIODIC, callback=sleep)
+
+
+def wakeUp():
+    wake_pin = Pin(12, Pin.IN, Pin.PULLUP)
+    esp32.wake_on_ext1(wake_pin, esp32.WAKEUP_ALL_LOW)
+    
+
+
+# awake
+if machine.reset_cause() == machine.DEEPSLEEP_RESET:
+    print('I am going to sleep for 1 minute.')
+    led_gpio.on()
+    
+else:
+    led_gpio.off()
+    
