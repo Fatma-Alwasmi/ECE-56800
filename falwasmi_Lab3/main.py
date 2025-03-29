@@ -1,24 +1,20 @@
 import network
 import ntptime
 import machine
-import esp32  # Add this import
+import esp32  
 from machine import RTC, Timer, Pin
 from neopixel import NeoPixel
 import time
 
 # -----------2.2.4.1. Wake up Sources-----------
 led_gpio = Pin(13, Pin.OUT)  
-led_gpio.value(1)  # Turn LED ON when awake
+led_gpio.value(1)  # Turn red LED ON when awake
 
 # Check wake-up reason at startup
-wake_reason = machine.reset_cause()
-if wake_reason == machine.DEEPSLEEP_RESET:
-    # Device woke up from deep sleep
-    wake_cause = esp32.wake_cause()
-    if wake_cause == esp32.EXT0_WAKE:
-        print("Woke up due to EXT0 wakeup.")
-    else:  
-        print("Woke up due to timer.")
+if machine.wake_reason() == machine.PIN_WAKE:
+    print("Woke up due to EXT0 wakeup")
+else:
+    print("Woke up due to Timer wake up")
 
 # -----------2.2.1.Connect to the Internet over WiFi-----------
 def do_connect():
@@ -78,11 +74,10 @@ def go_to_sleep(timer):
     print("I am going to sleep for 1 minute.")
     
     wake_pin = Pin(14, Pin.IN, Pin.PULL_UP)
-    esp32.wake_on_ext0(pin=wake_pin, level=0)
+    esp32.wake_on_ext0(pin=wake_pin, level=esp32.WAKEUP_ALL_LOW)
     
     led_gpio.value(0)
-    
     machine.deepsleep(60000)
-
+    
 timer3 = Timer(2)
 timer3.init(period=30000, mode=Timer.PERIODIC, callback=go_to_sleep)
