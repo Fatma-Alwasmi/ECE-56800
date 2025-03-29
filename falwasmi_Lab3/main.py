@@ -1,9 +1,24 @@
 import network
 import ntptime
 import machine
-from machine import RTC, Timer, deepsleep, Pin
+import esp32  # Add this import
+from machine import RTC, Timer, Pin
 from neopixel import NeoPixel
 import time
+
+# -----------2.2.4.1. Wake up Sources-----------
+led_gpio = Pin(13, Pin.OUT)  
+led_gpio.value(1)  # Turn LED ON when awake
+
+# Check wake-up reason at startup
+wake_reason = machine.reset_cause()
+if wake_reason == machine.DEEPSLEEP_RESET:
+    # Device woke up from deep sleep
+    wake_cause = esp32.wake_cause()
+    if wake_cause == esp32.EXT0_WAKE:
+        print("Woke up due to EXT0 wakeup.")
+    else:  
+        print("Woke up due to timer.")
 
 # -----------2.2.1.Connect to the Internet over WiFi-----------
 def do_connect():
@@ -19,23 +34,18 @@ def do_connect():
         print(f"Connected to {ssid}")
         print(f"IP Adress: {IP}")
 
-
-
 def get_date_time():
     ntptime.settime() # connect to NTP server pool.ntp.org
-    current_time = time.localtime(time.time() - 4 * 3600) # get UTC time and conver to EST time 
-
+    current_time = time.localtime(time.time() - 4 * 3600) # get UTC time and convert to EST time 
     # set real-timer clock to current time fetched above  
     rtc.datetime((current_time[0], current_time[1], current_time[2],     # year, month, day
                   current_time[6],                                       # weekday
                   current_time[3], current_time[4], current_time[5], 0)) # hr, min, sec, microsec 
- 
- 
- # -----------2.2.2. Display Current Date and Time using Network Time Protocol (NTP)-----------
+
+# -----------2.2.2. Display Current Date and Time using Network Time Protocol (NTP)-----------
 def display_date_time(timer):
     now = rtc.datetime() # retrieves current date/time that was prev set by get_date_time()
     weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
     print(f"Date: {now[1]:02d}/{now[2]:02d}/{now[0]:04d} {weekdays[now[3]]}")  # mm/dd/yyyy weekday 
     print(f"Time: {now[4]:02d}:{now[5]:02d}:{now[6]:02d} HRS") # hr:min:sec:microsec HRS
 
@@ -44,7 +54,6 @@ do_connect()
 get_date_time()
 timer1 = Timer(0)
 timer1.init(period = 15000, mode=Timer.PERIODIC, callback=display_date_time)
-
 
 # -----------2.2.3. NeoPixel Control by Touch Input-----------
 touch = machine.TouchPad(Pin(12, machine.Pin.IN))
@@ -64,29 +73,16 @@ def detect_touch(timer):
 timer2 = Timer(1)
 timer2.init(period = 50, mode=Timer.PERIODIC, callback=detect_touch)
 
-
 # -----------2.2.4. Red LED, Deep Sleep, and Different Wake Up Sources-----------
-#led_gpio = Pin(13, machine.Pin.IN)
+def go_to_sleep(timer):
+    print("I am going to sleep for 1 minute.")
+    
+    wake_pin = Pin(14, Pin.IN, Pin.PULL_UP)
+    esp32.wake_on_ext0(pin=wake_pin, level=0)
+    
+    led_gpio.value(0)
+    
+    machine.deepsleep(60000)
 
-# def sleep(time):
-#     print("I am going to sleep for 1 minute.")
-#     machine.deepsleep(60000)
-    
-#timer3 = Timer(2)
-# timer3.init(period=30000, mode=Timer.PERIODIC, callback=sleep)
-# 
-# 
-# def wakeUp():
-#     wake_pin = Pin(12, Pin.IN, Pin.PULLUP)
-#     esp32.wake_on_ext1(wake_pin, esp32.WAKEUP_ALL_LOW)
-#     
-# 
-# 
-# # awake
-# if machine.reset_cause() == machine.DEEPSLEEP_RESET:
-#     print('I am going to sleep for 1 minute.')
-#     led_gpio.on()
-#     
-# else:
-#     led_gpio.off()
-    
+timer3 = Timer(2)
+timer3.init(period=30000, mode=Timer.PERIODIC, callback=go_to_sleep)
