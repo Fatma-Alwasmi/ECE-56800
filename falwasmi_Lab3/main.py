@@ -13,7 +13,7 @@ led_gpio.value(1)  # Turn red LED ON when awake
 # Check wake-up reason at startup
 if machine.wake_reason() == machine.PIN_WAKE:
     print("Woke up due to EXT0 wakeup")
-else:
+elif machine.wake_reason() == machine.DEEPSLEEP_RESET:
     print("Woke up due to Timer wake up")
 
 # -----------2.2.1.Connect to the Internet over WiFi-----------
@@ -42,7 +42,7 @@ def get_date_time():
 def display_date_time(timer):
     now = rtc.datetime() # retrieves current date/time that was prev set by get_date_time()
     weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    print(f"Date: {now[1]:02d}/{now[2]:02d}/{now[0]:04d} {weekdays[now[3]]}")  # mm/dd/yyyy weekday 
+    print(f"Date: {now[1]:02d}/{now[2]:02d}/{now[0]:04d}")  # mm/dd/yyyy weekday 
     print(f"Time: {now[4]:02d}:{now[5]:02d}:{now[6]:02d} HRS") # hr:min:sec:microsec HRS
 
 rtc = RTC()
@@ -81,3 +81,4 @@ def go_to_sleep(timer):
     
 timer3 = Timer(2)
 timer3.init(period=30000, mode=Timer.PERIODIC, callback=go_to_sleep)
+
