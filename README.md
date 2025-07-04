@@ -1,4 +1,5 @@
-<p align="center">Linux Kernel CVE Patch Collection Summary
+<p align="center">
+Linux Kernel CVE Patch Collection Summary
 ==================================================
 
 Patches by Subsystem:
