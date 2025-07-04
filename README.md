@@ -2,7 +2,7 @@
   
 Linux Kernel CVE Patch Collection Summary
 ==================================================
-
+</center>
 Patches by Subsystem:
 -------------------------
 drivers        : 1558 patches<br />
@@ -41,7 +41,7 @@ information_disclosure   :   11 patches<br />
 user_data_without_validation:    1 patches<br />
 
 Total Patches Collected: 2574<br />
-
+</center>
 Collection Metadata:
 --------------------
 Subsystems Found: 18<br />
