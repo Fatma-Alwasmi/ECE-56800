@@ -1,4 +1,4 @@
-Linux Kernel CVE Patch Collection Summary
+<p align="center">Linux Kernel CVE Patch Collection Summary
 ==================================================
 
 Patches by Subsystem:
@@ -44,3 +44,4 @@ Collection Metadata:
 --------------------
 Subsystems Found: 18<br />
 Bug Types Found: 13<br />
+</p>
